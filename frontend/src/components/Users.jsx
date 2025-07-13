@@ -5,9 +5,8 @@ import { useNavigate } from "react-router-dom";
 import debounce from "lodash.debounce";
 
 export const Users = () => {
+  const [allUsers, setAllUsers] = useState([]); // Always filtered (no current user)
   const [users, setUsers] = useState([]);
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [fillerUsers, setFillerUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
@@ -32,50 +31,38 @@ export const Users = () => {
   ).current;
 
   useEffect(() => {
-    async function fetchRecentUsers() {
+    async function fetchUsers() {
       try {
-        const res = await axios.get("/api/v1/user/recent", {
+        const res1 = await axios.get("/api/v1/user/recent", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setRecentUsers(excludeCurrentUser(res.data));
+
+        const res2 = await axios.get("/api/v1/user/bulk?filter=", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        const combined = [...res1.data, ...res2.data.userList].filter(
+          (user, index, self) =>
+            user._id.toString() !== currentUserId?.toString() &&
+            index === self.findIndex((u) => u._id === user._id)
+        );
+
+        setAllUsers(combined);
+        setUsers(combined);
       } catch (err) {
-        console.error("Error fetching recent users:", err);
+        console.error("Error fetching users:", err);
       }
     }
 
-    async function fetchFillerUsers() {
-      try {
-        const res = await axios.get("/api/v1/user/bulk?filter=", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setFillerUsers(excludeCurrentUser(res.data.userList));
-      } catch (err) {
-        console.error("Error fetching filler users:", err);
-      }
-    }
-
-    fetchRecentUsers();
-    fetchFillerUsers();
+    fetchUsers();
   }, [currentUserId]);
-
-  useEffect(() => {
-    if (recentUsers.length > 0 || fillerUsers.length > 0) {
-      const combined = [...recentUsers, ...fillerUsers].filter(
-        (user, index, self) => index === self.findIndex((u) => u._id === user._id)
-      );
-      setUsers(excludeCurrentUser(combined));
-    }
-  }, [recentUsers, fillerUsers]);
 
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
 
     if (value.trim() === "") {
-      const combined = [...recentUsers, ...fillerUsers].filter(
-        (user, index, self) => index === self.findIndex((u) => u._id === user._id)
-      );
-      setUsers(excludeCurrentUser(combined));
+      setUsers(allUsers);
     } else {
       debouncedSearch(value);
     }
