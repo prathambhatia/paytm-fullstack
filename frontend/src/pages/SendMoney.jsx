@@ -31,23 +31,17 @@ const SendMoney = () => {
     try {
       await axios.post(
         "/api/v1/account/transfer",
-        {
-          to: userId,
-          amount: Number(amount),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { to: userId, amount: Number(amount) },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       await fetchBalance();
 
-      // Update local recent users
-      const localRecent = JSON.parse(localStorage.getItem("recentUsers")) || [];
-      const newUser = { _id: userId, firstName, lastName };
-      const updatedList = [newUser, ...localRecent.filter(u => u._id !== userId)];
-      localStorage.setItem("recentUsers", JSON.stringify(updatedList));
+      // ✅ Store last interacted user simply — used only for sorting in frontend
+      localStorage.setItem(
+        "lastInteractedUser",
+        JSON.stringify({ _id: userId, firstName, lastName })
+      );
 
       alert("Funds transferred successfully!");
       setAmount("");
