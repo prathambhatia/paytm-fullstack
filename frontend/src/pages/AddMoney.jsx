@@ -27,7 +27,7 @@ const AddMoney = () => {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        "http://localhost:3000/api/v1/account/addfunds",
+        "/api/v1/account/addfunds",
         { amount: Number(amount) },
         {
           headers: {
