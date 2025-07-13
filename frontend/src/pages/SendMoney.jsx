@@ -42,6 +42,13 @@ const SendMoney = () => {
         }
       );
       await fetchBalance();
+
+      // Update local recent users
+      const localRecent = JSON.parse(localStorage.getItem("recentUsers")) || [];
+      const newUser = { _id: userId, firstName, lastName };
+      const updatedList = [newUser, ...localRecent.filter(u => u._id !== userId)];
+      localStorage.setItem("recentUsers", JSON.stringify(updatedList));
+
       alert("Funds transferred successfully!");
       setAmount("");
       navigate("/dashboard");
@@ -55,14 +62,9 @@ const SendMoney = () => {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center bg-[#1E1E1E]">
-
       <div className="fixed top-6 right-8 w-30">
         <Link to="/dashboard">
-          <Button 
-            title="Dashboard"
-            bgColor="btn"
-            textColor="text-white"
-          />
+          <Button title="Dashboard" bgColor="btn" textColor="text-white" />
         </Link>
       </div>
 
