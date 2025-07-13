@@ -40,7 +40,7 @@ const AddMoney = () => {
       setAmount("");
       navigate("/dashboard");
     } catch (err) {
-      const message = err.response?.data?.error || "Failed to add funds.";
+      const message = err.response?.data?.message || "Failed to add funds.";
       alert(message);
     } finally {
       setShowConfirm(false);
