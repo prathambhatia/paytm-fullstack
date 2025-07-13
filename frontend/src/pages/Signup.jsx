@@ -17,7 +17,7 @@ export function Signup() {
     e.preventDefault();
 
     try {
-        await axios.post("http://localhost:3000/api/v1/user/signup", {
+        await axios.post("/api/v1/user/signup", {
         username,
         password,
         firstName,
