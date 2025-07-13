@@ -27,7 +27,7 @@ export const Users = () => {
       } catch (err) {
         console.error("Error searching users:", err);
       }
-    }, 500)
+    }, 10)
   ).current;
 
   useEffect(() => {
