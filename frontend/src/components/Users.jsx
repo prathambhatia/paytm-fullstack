@@ -11,28 +11,49 @@ export const Users = () => {
 
   const currentUserId = localStorage.getItem("userId");
 
+  // Fetch recent users from backend + move lastInteractedUser (if exists) to the top
   const fetchRecentUsers = async () => {
     try {
       const res = await axios.get("/api/v1/user/recent", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setUsers(res.data.filter(user => user._id !== currentUserId));
+
+      // Remove current user from the list
+      const recentUsers = res.data.filter(user => user._id !== currentUserId);
+
+      // Get last interacted user from localStorage
+      const lastInteractedUser = JSON.parse(localStorage.getItem("lastInteractedUser"));
+
+      let finalUsers = recentUsers;
+
+      // If last interacted user exists and is not the current user, show them first
+      if (lastInteractedUser && lastInteractedUser._id !== currentUserId) {
+        finalUsers = [
+          lastInteractedUser,
+          ...recentUsers.filter(user => user._id !== lastInteractedUser._id),
+        ];
+      }
+
+      setUsers(finalUsers);
     } catch (err) {
       console.error("Error fetching recent users:", err);
     }
   };
 
+  // Fetch users matching the search query (excluding current user)
   const fetchSearchUsers = async (value) => {
     try {
       const res = await axios.get(`/api/v1/user/bulk?filter=${value}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+
       setUsers(res.data.userList.filter(user => user._id !== currentUserId));
     } catch (err) {
       console.error("Error searching users:", err);
     }
   };
 
+  // Debounce search to avoid sending request on every keystroke instantly
   const debouncedSearch = debounce((value) => {
     if (value.length >= 1) {
       fetchSearchUsers(value);
@@ -41,10 +62,12 @@ export const Users = () => {
     }
   }, 30);
 
+  // On page load, fetch recent users
   useEffect(() => {
     fetchRecentUsers();
   }, []);
 
+  // Handle search input change
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -72,6 +95,7 @@ export const Users = () => {
   );
 };
 
+// Renders each user card with Send button
 function User({ user, navigate }) {
   return (
     <div className="flex justify-between items-center p-4 rounded-xl shadow-md bg-[#1E1E1E]">
@@ -82,11 +106,13 @@ function User({ user, navigate }) {
         </div>
       </div>
       <button
-        onClick={() =>
+        onClick={() => {
+          // Save last interacted user in localStorage before navigating
+          localStorage.setItem("lastInteractedUser", JSON.stringify(user));
           navigate(`/send/${user._id}`, {
             state: { firstName: user.firstName, lastName: user.lastName },
-          })
-        }
+          });
+        }}
         className="btn text-white px-4 py-1 rounded hover:btn transition"
       >
         Send
