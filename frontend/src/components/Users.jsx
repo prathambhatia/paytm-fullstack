@@ -17,7 +17,7 @@ export const Users = () => {
     debounce(async (value) => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/api/v1/user/bulk?filter=${value}`,
+          `/api/v1/user/bulk?filter=${value}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -38,7 +38,7 @@ export const Users = () => {
     async function fetchRecentUsers() {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/v1/user/recent",
+          "/api/v1/user/recent",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
