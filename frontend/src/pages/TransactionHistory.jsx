@@ -68,7 +68,7 @@ const TransactionHistory = () => {
   const net = totals.received - totals.sent;
 
   return (
-    <div className="min-h-screen mx-40 bg-[#1E1E1E]">
+    <div className="min-h-screen mx-auto max-w-4xl px-4 bg-[#1E1E1E]">
       <AppBar text="Transactions History" firstName={firstName} />
             {/* Top-right Dashboard Button */}
       <div className="flex justify-end mt-4 mr-2">
