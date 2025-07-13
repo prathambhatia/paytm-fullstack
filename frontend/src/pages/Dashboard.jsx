@@ -25,14 +25,14 @@ export const Dashboard = () => {
                     <Transaction />
                 </div>
                 
-                <div className="flex justify-between">
+                 <div className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
                     <Link to="/addmoney">
-                        <button className="btn-green ml-4">
+                        <button className="btn-green w-full sm:w-auto">
                             Add funds
                         </button>
                     </Link>
                     <Link to="/transactions">
-                        <button className="btn-blue mr-4">
+                        <button className="btn-blue w-full sm:w-auto">
                             History
                         </button>
                     </Link>
