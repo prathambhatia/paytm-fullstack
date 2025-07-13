@@ -46,7 +46,7 @@ const SendMoney = () => {
       setAmount("");
       navigate("/dashboard");
     } catch (err) {
-      const message = err.response?.data?.error || "Failed to transfer funds.";
+      const message = err.response?.data?.message || "Failed to transfer funds.";
       alert(message);
     } finally {
       setShowConfirm(false);
