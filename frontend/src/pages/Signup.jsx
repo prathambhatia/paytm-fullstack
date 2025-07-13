@@ -28,7 +28,7 @@ export function Signup() {
       naviagate("/signin");
     }
     catch(err) {
-      const message = err.response?.data?.error || "Signup failed.";
+      const message = err.response?.data?.message || "Signup failed.";
       alert(message);
     }
   }
