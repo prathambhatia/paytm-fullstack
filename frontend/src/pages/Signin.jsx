@@ -27,7 +27,7 @@ export const Signin = () => {
 
             navigate("/dashboard");
         } catch(err) {
-            const message = err.repsonse?.data?.error || "Signin failed."
+            const message = err.repsonse?.data?.message || "Signin failed."
             alert(message);
         }
         
