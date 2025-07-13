@@ -18,9 +18,9 @@ export const Dashboard = () => {
 
     return (
         <>
-            <div className="min-h-screen mx-40">
+            <div className="min-h-screen mx-auto px-4 sm:px-6 lg:px-40">
                  <AppBar text="Payments App" firstName={firstName}></AppBar>
-                 <div className="flex justify-between">
+                 <div className="flex flex-col lg:flex-row gap-4">
                     <Balance balance={balance ?? "Loading..."}/>
                     <Transaction />
                 </div>
