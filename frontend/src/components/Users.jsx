@@ -69,18 +69,25 @@ export const Users = () => {
   }, [currentUserId]);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
+    // Initialize combined users once recent and filler are both fetched
+    if (recentUsers.length > 0 || fillerUsers.length > 0) {
       const combined = [...recentUsers, ...fillerUsers].filter(
         (user, index, self) => index === self.findIndex((u) => u._id === user._id)
       );
       setUsers(combined);
     }
-  }, [searchTerm, recentUsers, fillerUsers]);
+  }, [recentUsers, fillerUsers]);
 
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    if (value.trim() !== "") {
+
+    if (value.trim() === "") {
+      const combined = [...recentUsers, ...fillerUsers].filter(
+        (user, index, self) => index === self.findIndex((u) => u._id === user._id)
+      );
+      setUsers(combined);
+    } else {
       debouncedSearch(value);
     }
   };
