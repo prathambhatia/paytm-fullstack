@@ -121,12 +121,20 @@ router.post('/signin', async (req, res) => {
 // ─── Bulk Search Route ───────────────────────────────────────
 router.get('/bulk', authMiddleware, async (req, res) => {
   const filter = req.query.filter || '';
+  const currentUserId = req.userId;
+
   const users = await User.find({
-    $or: [
-      { firstName: { $regex: filter, $options: 'i' } },
-      { lastName:  { $regex: filter, $options: 'i' } }
+    $and: [
+      {
+        $or: [
+          { firstName: { $regex: filter, $options: 'i' } },
+          { lastName:  { $regex: filter, $options: 'i' } }
+        ]
+      },
+      { _id: { $ne: currentUserId } }
     ]
   });
+
   return res.json({ userList: users });
 });
 
@@ -136,28 +144,23 @@ router.get('/recent', authMiddleware, async (req, res) => {
   try {
     const currentUserId = req.userId;
 
-    // 1. Fetch recent transactions involving current user
     const transactions = await Transaction.find({
       $or: [{ from: currentUserId }, { to: currentUserId }]
     }).sort({ timestamp: -1 });
 
-    // 2. Extract unique user IDs interacted with
     const interactedIds = [...new Set(
       transactions.map(tx =>
         tx.from.toString() === currentUserId.toString()
           ? tx.to.toString()
           : tx.from.toString()
       )
-    )];
+    )].filter(id => id !== currentUserId);
 
-    // 3. Fetch user details for these IDs
     let recentUsers = await User.find({
-      _id: { $in: interactedIds, $ne: currentUserId }
+      _id: { $in: interactedIds }
     });
 
-
-    // 4. If fewer than 10, fill with random users
-    if (recentUsers.length < 10) { 
+    if (recentUsers.length < 10) {
       const fillerUsers = await User.find({
         _id: { $nin: [currentUserId, ...interactedIds] }
       }).limit(10 - recentUsers.length);
@@ -171,6 +174,7 @@ router.get('/recent', authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 // ─── Update Profile Route ──────────────────────────────────────
