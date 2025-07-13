@@ -13,17 +13,17 @@ export const Users = () => {
 
   const currentUserId = localStorage.getItem("userId");
 
+  const excludeCurrentUser = (usersList) => {
+    return usersList.filter(user => user._id.toString() !== currentUserId?.toString());
+  };
+
   const debouncedSearch = useRef(
     debounce(async (value) => {
       try {
         const res = await axios.get(`/api/v1/user/bulk?filter=${value}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        const filtered = res.data.userList.filter(
-          (user) => user._id !== currentUserId
-        );
+        const filtered = excludeCurrentUser(res.data.userList);
         setUsers(filtered);
       } catch (err) {
         console.error("Error searching users:", err);
@@ -35,14 +35,9 @@ export const Users = () => {
     async function fetchRecentUsers() {
       try {
         const res = await axios.get("/api/v1/user/recent", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        const filtered = res.data.filter(
-          (user) => user._id !== currentUserId
-        );
-        setRecentUsers(filtered);
+        setRecentUsers(excludeCurrentUser(res.data));
       } catch (err) {
         console.error("Error fetching recent users:", err);
       }
@@ -51,14 +46,9 @@ export const Users = () => {
     async function fetchFillerUsers() {
       try {
         const res = await axios.get("/api/v1/user/bulk?filter=", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        const filtered = res.data.userList.filter(
-          (user) => user._id !== currentUserId
-        );
-        setFillerUsers(filtered);
+        setFillerUsers(excludeCurrentUser(res.data.userList));
       } catch (err) {
         console.error("Error fetching filler users:", err);
       }
@@ -69,12 +59,11 @@ export const Users = () => {
   }, [currentUserId]);
 
   useEffect(() => {
-    // Initialize combined users once recent and filler are both fetched
     if (recentUsers.length > 0 || fillerUsers.length > 0) {
       const combined = [...recentUsers, ...fillerUsers].filter(
         (user, index, self) => index === self.findIndex((u) => u._id === user._id)
       );
-      setUsers(combined);
+      setUsers(excludeCurrentUser(combined));
     }
   }, [recentUsers, fillerUsers]);
 
@@ -86,7 +75,7 @@ export const Users = () => {
       const combined = [...recentUsers, ...fillerUsers].filter(
         (user, index, self) => index === self.findIndex((u) => u._id === user._id)
       );
-      setUsers(combined);
+      setUsers(excludeCurrentUser(combined));
     } else {
       debouncedSearch(value);
     }
