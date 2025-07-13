@@ -8,6 +8,7 @@ import Transaction from "../components/Transaction";
 
 export const Dashboard = () => {
   const firstName = localStorage.getItem("firstName") || "Pratham";
+  const [authChecked, setAuthChecked] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const navigate = useNavigate();
 
@@ -20,7 +21,13 @@ export const Dashboard = () => {
     } else {
       fetchBalance();
     }
+    setAuthChecked(true); // Mark check as done
   }, []);
+
+  if (!authChecked) {
+    // While checking, avoid flashing content
+    return <div className="min-h-screen bg-[#1E1E1E]"></div>;
+  }
 
   if (showAuthPopup) {
     return (
