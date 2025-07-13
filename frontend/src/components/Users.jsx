@@ -39,7 +39,7 @@ export const Users = () => {
     } else {
       fetchRecentUsers();
     }
-  }, 300);
+  }, 30);
 
   useEffect(() => {
     fetchRecentUsers();
