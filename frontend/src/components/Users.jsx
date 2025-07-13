@@ -1,4 +1,3 @@
-// React imports
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Avatar from "../components/Avatar";
@@ -8,6 +7,7 @@ import debounce from "lodash.debounce";
 export const Users = () => {
   const [users, setUsers] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
+  const [fillerUsers, setFillerUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
@@ -16,14 +16,11 @@ export const Users = () => {
   const debouncedSearch = useRef(
     debounce(async (value) => {
       try {
-        const res = await axios.get(
-          `/api/v1/user/bulk?filter=${value}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const res = await axios.get(`/api/v1/user/bulk?filter=${value}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         const filtered = res.data.userList.filter(
           (user) => user._id !== currentUserId
         );
@@ -37,32 +34,48 @@ export const Users = () => {
   useEffect(() => {
     async function fetchRecentUsers() {
       try {
-        const res = await axios.get(
-          "/api/v1/user/recent",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const res = await axios.get("/api/v1/user/recent", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         const filtered = res.data.filter(
-          (user) => user._id.toString() !== currentUserId.toString()
+          (user) => user._id !== currentUserId
         );
-        setUsers(filtered);
         setRecentUsers(filtered);
       } catch (err) {
         console.error("Error fetching recent users:", err);
       }
     }
 
+    async function fetchFillerUsers() {
+      try {
+        const res = await axios.get("/api/v1/user/bulk?filter=", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const filtered = res.data.userList.filter(
+          (user) => user._id !== currentUserId
+        );
+        setFillerUsers(filtered);
+      } catch (err) {
+        console.error("Error fetching filler users:", err);
+      }
+    }
+
     fetchRecentUsers();
+    fetchFillerUsers();
   }, [currentUserId]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
-      setUsers(recentUsers);
+      const combined = [...recentUsers, ...fillerUsers].filter(
+        (user, index, self) => index === self.findIndex((u) => u._id === user._id)
+      );
+      setUsers(combined);
     }
-  }, [searchTerm, recentUsers]);
+  }, [searchTerm, recentUsers, fillerUsers]);
 
   const handleSearch = (e) => {
     const value = e.target.value;
