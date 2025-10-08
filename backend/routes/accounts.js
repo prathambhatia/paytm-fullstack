@@ -85,7 +85,7 @@ router.post("/addfunds", authMiddleware, async (req, res) => {
 
 router.get('/balance', authMiddleware, async (req, res) => {
   try {
-    const account = await Account.findOne({ userId: req.userId });
+    const account = await Account.findOne({ userId: req.userId }); //to findd one user
 
     if (!account) {
       return res.status(404).json({ error: "Account not found" });
